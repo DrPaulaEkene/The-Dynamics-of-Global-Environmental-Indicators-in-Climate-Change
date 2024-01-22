@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt                       #package for visualization
 from sklearn.cluster import KMeans                    #Importing Kmean from 
 from sklearn.metrics import silhouette_score          #to calculate Silhouete score
 from sklearn.preprocessing import StandardScaler      #for data normalization
-from scipy.optimize import curve_fit
-import statsmodels.api as sm
-from statsmodels.sandbox.regression.predstd import wls_prediction_std
+from scipy.optimize import curve_fit                  #For fitting
+import statsmodels.api as sm                          #for statistical analysis
 
 
 #define all necessary functions
@@ -266,7 +265,8 @@ plt.show()
 cluster_data['Cluster'] = cluster_labels
 
 # Calculate the silhouette score
-silhouette_avg = silhouette_score(cluster_data[[indicator1, indicator2]], cluster_labels)
+silhouette_avg = silhouette_score(cluster_data[[indicator1, indicator2]],
+                                  cluster_labels)
 
 print(f"The average silhouette score for 3 clusters is: {silhouette_avg}")
 
@@ -280,48 +280,51 @@ cluster_summary = cluster_data.groupby('Cluster').agg(
 print(cluster_summary)
 
 for cluster_number in range(3):  # Since we have 3 clusters (0, 1, 2)
-    countries = cluster_data[cluster_data['Cluster'] == cluster_number].index.tolist()
+    countries = cluster_data[cluster_data['Cluster']
+                             == cluster_number].index.tolist()
     print(f"Countries in Cluster {cluster_number}: {countries}")
 
 
-#fitting
+#Fitting
 # Extract data for the specified countries, one from each cluster
 countries = ["Germany", "Sweden", "Nigeria"]
 
-# Filter the data for these countries
+# Filtering the data for these countries
 filtered_data = climate_data[climate_data['Country Name'].isin(countries)]
 
-# Check the extracted data
-print(filtered_data.head(len(countries) * 2)) # Displaying two rows per country
+# Checking the extracted data
+print(filtered_data.head(len(countries) * 3)) # Displaying two rows per country for clarity
 
-# Filter the data to include only renewable energy consumption data
-rec_data = filtered_data[filtered_data['Series Name'].str.contains("Renewableenergy consumption")]
+# Filtering the data to include only renewable energy consumption data 
+rec_data = filtered_data[filtered_data['Series Name'].str.contains(
+    "Renewable energy consumption")]
 
-# Drop unnecessary columns
+# Dropping unnecessary columns
 rec_data_cleaned = rec_data.drop(columns=["Series Name", "Series Code",
                                           "Country Code"])
 
-# Set the country name as the index
+# Setting the country name as the index
 rec_data_cleaned.set_index("Country Name", inplace=True)
 
-# Transpose and clean the data for easier analysis
+# Transposing the data for easier analysis
 rec_data_transposed = rec_data_cleaned.T
 
-# Convert the years in the columns to datetime and ensuring the data is numeric
+# Converting the years in the columns to datetime and ensuring the data is numeric
 rec_data_transposed.index = pd.to_datetime(rec_data_transposed.index.str.extract("(\d{4})")[0])
 rec_data_transposed = rec_data_transposed.apply(pd.to_numeric, errors='coerce')
 
-# Display the transformed data
+# Displaying the transformed data
 print(rec_data_transposed.head(8))
 
-# Prepare data for fitting
+
+# Preparing data for fitting
 years = rec_data_transposed.index.year
 predictions_years = np.array([2030, 2040])
 
 # Dictionary to store models and predictions
 models_predictions = {}
 
-# Fit models for each country
+# Fitting models for each country
 for country in rec_data_transposed.columns:
     # Extract country data
     y = rec_data_transposed[country].dropna()
@@ -344,7 +347,8 @@ for country in rec_data_transposed.columns:
             "upper": upper_bounds
         }
     }
-
+    
+    
 def fit_model(x_vals, y_vals, country_name, degree=3, prediction_start_year=1990, prediction_end_year=2040):
     # Fit a high-degree polynomial to the historical data
     high_degree = len(x_vals) - 1
@@ -379,5 +383,6 @@ for country in rec_data_transposed.columns:
     data_points = rec_data_transposed[country].dropna()
     X_values = data_points.index.year.astype("int")
     y_values = data_points.values.astype("float64")
-    fit_model(X_values, y_values, country, degree=3, prediction_start_year=1990, prediction_end_year=2040)
+    fit_model(X_values, y_values, country, degree=3, prediction_start_year=1990,
+              prediction_end_year=2040)
 
