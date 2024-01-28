@@ -188,7 +188,7 @@ merged_df.rename(columns=name_mapping, inplace=True)
 
 # Visualize the correlation matrix using a heatmap
 plt.figure(figsize=(10, 8))
-sns.heatmap(merged_df.corr(), annot=True, cmap='coolwarm', fmt=".2f",
+sns.heatmap(merged_df.corr(), annot=True, cmap='plasma', fmt=".2f",
             linewidths=.5, annot_kws={"size": 13})
 plt.title("Correlation Matrix of Climate Indicators")
 plt.show()
@@ -269,8 +269,7 @@ for cluster_number in range(3):  # Since we have 3 clusters (0, 1, 2)
 
 
 # Extract fitting data for the specified countries, one from each cluster
-countries = ["Germany", "United States", "China", "Sweden", "Uganda",
-             "Nigeria"]
+countries = ["Germany", "China", "Nigeria"]
 filtered_data = climate_data[climate_data['Country Name'].isin(countries)]
 rec_data = filtered_data[filtered_data['Series Name'].str.contains(
     "Renewable energy consumption")]
@@ -289,8 +288,7 @@ rec_data_transposed.head(8)
 
 # Preparing prediction and forecasting data
 years = rec_data_transposed.index.year
-selected_countries = ["Germany", "United States", "China", "Sweden", "Uganda",
-                      "Nigeria"]
+selected_countries = ["Germany", "China", "Nigeria"]
 selected_countries_predictions = {}
 
 
@@ -325,15 +323,16 @@ for country in selected_countries:
         # Visualization
         plt.figure(figsize=(12, 8))
         plt.plot(x_prediction, y_prediction, label='Forecast',
-                 color='orange', linewidth=4)
+                 color='blue', linewidth=4)
         plt.plot(x_smoothed, y_smoothed,
-                 label='Historical Data', color='blue',
+                 label='Historical Data', color='red',
                  linewidth=4, linestyle='--')
         plt.fill_between(x_prediction, ci_lower, ci_upper,
-                         color='lightgreen', alpha=0.2,
+                         color='gold', alpha=0.2,
                          label='Confidence Range')
         plt.legend(loc='best')
-        plt.title(f"Renewable Energy Consumption Prediction for {country}")
-        plt.xlabel('Year')
-        plt.ylabel('% Total Renewable Energy')
+        plt.title(f"Renewable Energy Consumption Prediction for {country}",
+                  fontsize=18)
+        plt.xlabel('Year', fontsize=16)
+        plt.ylabel('% Total Renewable Energy', fontsize=16)
         plt.show()
